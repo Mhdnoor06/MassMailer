@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.lordicon.com/pzdvqjsp.js"></script>
+    <title>Document</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Changa+One&family=Poppins:wght@200;300;400&family=Roboto+Slab:wght@700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <style>
+    body {
+      display: grid;
+      align-items: center;
+      justify-content: center;
+      background-image: linear-gradient(
+        to bottom right,
+        #004977,
+        #00153a,
+        #060b2f
+      );
+      font-family: 'Roboto slab';
+      font-size: 1.5rem;
+      overflow: hidden;
+      background-size: cover;
+      color: aliceblue;
+      height: 100vh;
+    }
+    .thanks {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button {
+      padding: 10px;
+      background-color: rgb(0, 78, 116);
+      color: white;
+      font-family: 'Roboto slab';
+      font-weight: 20px;
+      font-size: 20px;
+    }
+    button:hover {
+      box-shadow: none;
+      border: 1px solid white;
+    }
+  </style>
+  <body>
+    <div class="thanks">
+      <h1>
+        Emails Has Been Sent successfully!
+        <lord-icon
+          class="icon"
+          src="https://cdn.lordicon.com/sdhhsgeg.json"
+          trigger="hover"
+          colors="primary:#4be1ec,secondary:#cb5eee"
+          style="width: 100px; height: 100px"
+        >
+        </lord-icon>
+      </h1>
+      <form action="/" method="get">
+        <button>Send Again</button>
+      </form>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mass Mail Dispatcher</title>
+    <link rel="stylesheet" href="upload.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Changa+One&family=Poppins:wght@200;300;400&family=Roboto+Slab:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.1/css/fontawesome.min.css"
+      integrity="sha384-QYIZto+st3yW+o8+5OHfT6S482Zsvz2WfOzpFSXMF9zqeLcFV0/wlZpMtyFcZALm"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"
+      integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="main">
+      <header>
+        <nav class="nav">
+          <div
+            class="logo"
+            style="display: flex; align-items: center; gap: 20px"
+          >
+            <h1 style="margin-right: 50px; font-size: 2rem">
+              <i class="bi bi-envelope-fill"></i> Mass Mail
+            </h1>
+            <div class="list">
+              <ul>
+                <li>
+                  <a
+                    href="index.html"
+                    style="text-decoration: none; color: white"
+                    >Home</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <div class="form" id="form_id">
+        <h3 style="margin: 20px">Choose CSV File</h3>
+        <div id="drop-area">
+          <i class="bi bi-upload" style="font-size: larger"></i>
+          <p>Drag and drop a file here or click to select a file</p>
+        </div>
+        <form
+          action="/upload"
+          method="post"
+          enctype="multipart/form-data"
+          id="upload_form"
+        >
+          <p id="error"></p>
+          <input
+            type="file"
+            name="file"
+            id="file-input"
+            style="display: none"
+            accept=".csv"
+            required
+          />
+          <button type="submit" id="submit-btn" disabled>Submit</button>
+        </form>
+      </div>
+      <div class="full-section" id="block" style="display: none">
+        <div id="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Valid Emails</th>
+                <th>Invalid Emails</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div class="send_email">
+          <div class="login" id="login-form">
+            <form id="sending">
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" required /><br />
+              <label for="password"
+                >Password
+                <i
+                  class="bi bi-info-circle info"
+                  title="Password should be 16 digits long from 2-step authentication."
+                ></i>
+              </label>
+              <input type="text" id="password" name="password" required />
+              <br />
+              <label for="subject">Subject:</label>
+              <input type="text" id="subject" name="subject" required />
+              <br />
+              <label for="message">Message: </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows="5"
+                cols="30"
+              ></textarea
+              ><br />
+              <p id="invalid-log"></p>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let dropArea = document.getElementById('drop-area');
+      let fileInput = document.getElementById('file-input');
+      let submitBtn = document.getElementById('submit-btn');
+      let formcls = document.getElementById('form_id');
+      let err = document.getElementById('error');
+
+      const form = document.querySelector('form');
+      const tableContainer = document.querySelector('#block');
+      const tableBody = document.querySelector('#table-body');
+
+      dropArea.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+      });
+
+      dropArea.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+      });
+
+      dropArea.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        fileInput.files = e.dataTransfer.files;
+        submitBtn.disabled = false;
+        showFileName(e.dataTransfer.files[0].name);
+      });
+
+      function showFileName(name) {
+        dropArea.innerHTML = name;
+      }
+
+      dropArea.addEventListener('click', function () {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', function () {
+        showFileName(fileInput.files[0].name);
+        submitBtn.disabled = false;
+      });
+      function showFileName(name) {
+        let dropArea = document.getElementById('drop-area');
+        dropArea.innerHTML = name;
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch('/upload', {
+          method: 'POST',
+          body: formData,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === 'error') {
+              err.textContent = data.message;
+              err.style.color = 'red';
+            } else {
+              formcls.style.display = 'none';
+              tableContainer.style.display = 'flex';
+              // console.log(data);
+              tableBody.innerHTML = '';
+              data.validated.forEach((email, index) => {
+                // console.log(email, index);
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td1.innerText = email.valid || '';
+                // console.log(data.valid);
+                const td2 = document.createElement('td');
+                td2.innerText = email.invalid || '';
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tableBody.appendChild(tr);
+              });
+            }
+          })
+          .catch((err) => console.log(err));
+      });
+
+      const form2 = document.getElementById('sending');
+      const invalid_login = document.getElementById('invalid-log');
+
+      form2.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        // Get form data
+        const email = form2.elements.email.value;
+        const password = form2.elements.password.value;
+        const subject = form2.elements.subject.value;
+        const message = form2.elements.message.value;
+
+        if (!message) {
+          invalid_login.style.color = 'red';
+          invalid_login.textContent = 'Please enter your name.';
+          return;
+        }
+        if (!email) {
+          invalid_login.style.color = 'red';
+          invalid_login.textContent = 'Please enter your email.';
+          return;
+        }
+
+        // Create request body
+        const requestBody = {
+          email,
+          password,
+          subject,
+          message,
+        };
+        console.log(requestBody);
+        // Send POST request to server
+        fetch('/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        })
+          .then((response) => {
+            if (response.ok) {
+              // Email sent successfully
+              alert('Email sent successfully!');
+              window.location.href = 'success.html';
+              form.reset();
+            } else {
+              // Email failed to send
+              invalid_login.style.color = 'red';
+              invalid_login.textContent = 'Invalid email or password'; // Set error message
+              // alert('Failed to send email. Please try again.');
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+            invalid_login.style.color = 'red';
+            invalid_login.textContent = 'Invalid email or password';
+            // alert('Failed to send email. Please try again.');
+          });
+      });
+    </script>
+  </body>
+</html>
