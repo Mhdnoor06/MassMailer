@@ -10,10 +10,10 @@ const app = express();
 
 const PORT = process.env.PORT || 3500;
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
 
 // Serve static files
-// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
